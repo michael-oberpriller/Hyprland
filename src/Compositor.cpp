@@ -311,6 +311,13 @@ void CCompositor::initServer(std::string socketName, int socketFd) {
     // set the buffer size to 1MB to avoid disconnects due to an app hanging for a short while
     wl_display_set_default_max_buffer_size(m_sWLDisplay, 1_MB);
 
+    setenv("WAYLAND_DISPLAY", m_szWLDisplaySocket.c_str(), 1);
+    setenv("XDG_SESSION_TYPE", "wayland", 1);
+    if (!getenv("XDG_CURRENT_DESKTOP")) {
+        setenv("XDG_CURRENT_DESKTOP", "Hyprland", 1);
+        m_bDesktopEnvSet = true;
+    }
+
     Aquamarine::SBackendOptions options{};
     options.logFunction = aqLog;
 
@@ -383,13 +390,6 @@ void CCompositor::initServer(std::string socketName, int socketFd) {
     if (m_szWLDisplaySocket.empty()) {
         Debug::log(CRIT, "m_szWLDisplaySocket NULL!");
         throwError("m_szWLDisplaySocket was null! (wl_display_add_socket and wl_display_add_socket_auto failed)");
-    }
-
-    setenv("WAYLAND_DISPLAY", m_szWLDisplaySocket.c_str(), 1);
-    setenv("XDG_SESSION_TYPE", "wayland", 1);
-    if (!getenv("XDG_CURRENT_DESKTOP")) {
-        setenv("XDG_CURRENT_DESKTOP", "Hyprland", 1);
-        m_bDesktopEnvSet = true;
     }
 
     initManagers(STAGE_BASICINIT);
